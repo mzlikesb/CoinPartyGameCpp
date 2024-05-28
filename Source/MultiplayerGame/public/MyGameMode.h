@@ -3,19 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/GameInstance.h"
-#include "MyGameInstance.generated.h"
+#include "GameFramework/GameMode.h"
+#include "MyGameMode.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class MULTIPLAYERGAME_API UMyGameInstance : public UGameInstance
+class MULTIPLAYERGAME_API AMyGameMode : public AGameMode
 {
 	GENERATED_BODY()
 	
 public:
-	virtual void Init() override;
-
+	AMyGameMode();
 
 };
