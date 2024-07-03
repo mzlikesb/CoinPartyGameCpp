@@ -13,7 +13,7 @@
   "Plugins": [
     {
       "Name": "VisualStudioTools",
-      "Enabled": true
+      "Enabled": false
     }
   ],
   "TargetPlatforms": [],
