@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "MyPlayerController.h"
 
 
@@ -16,6 +15,7 @@ void AMyPlayerController::SetWidget(){
         UUserWidget* Widget = CreateWidget<UUserWidget>(this, WidgetClass);
         if(Widget){
             Widget->AddToViewport();
+            bShowMouseCursor = true;
         }
     }
 }

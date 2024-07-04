@@ -5,6 +5,7 @@
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "Online/OnlineSessionNames.h"
 #include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -25,8 +26,6 @@ void UMyGameInstance::CreateGame(FName SessionName){
             SessionSettings = MakeShareable(new FOnlineSessionSettings());
             SessionSettings->bIsLANMatch = true;
             SessionSettings->NumPublicConnections = 4;
-            SessionSettings->bShouldAdvertise = true;
-            SessionSettings->bUsesPresence = true;
 
             Sessions->OnCreateSessionCompleteDelegates.AddUObject(this, &UMyGameInstance::OnCreateSessionComplete);
             Sessions->CreateSession(0, SessionName, *SessionSettings);
@@ -83,4 +82,47 @@ void UMyGameInstance::OnDestroySessionComplete(FName SessionName, bool bWasSucce
 
 FName UMyGameInstance::GetSessionName(){
     return CurrentSessionName;
+}
+
+void UMyGameInstance::FindGame() {
+    IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
+
+    if (OnlineSubsystem) {
+
+        IOnlineSessionPtr Sessions = OnlineSubsystem->GetSessionInterface();
+        if (Sessions.IsValid())
+        {
+            SessionSearch = MakeShareable(new FOnlineSessionSearch());
+            SessionSearch->bIsLanQuery = true;
+            SessionSearch->MaxSearchResults = 20;
+            SessionSearch->PingBucketSize = 50;
+
+            Sessions->OnFindSessionsCompleteDelegates.AddUObject(this, &UMyGameInstance::OnFindSessionsComplete);
+            Sessions->FindSessions(0, SessionSearch.ToSharedRef());
+        }
+    }
+}
+
+void UMyGameInstance::OnFindSessionsComplete(bool bWasSuccessful) {
+   
+    if (!bWasSuccessful)
+    {
+        UE_LOG(LogTemp, Log, TEXT("Find Sessions failed."));
+        return;
+    }
+
+    TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
+    UE_LOG(LogTemp, Log, TEXT("Find Sessions %d."), SearchResults.Num());
+    
+    int32 SessionIndex = 0;
+    for(const FOnlineSessionSearchResult result : SearchResults) {
+        FString SessionName = result.Session.OwningUserName;
+        int32 MaxPlayerNumber = result.Session.SessionSettings.NumPublicConnections;
+        int32 CurrentPlayerNumber = result.Session.NumOpenPublicConnections;
+        onFoundSessions.Broadcast(SessionName, MaxPlayerNumber, CurrentPlayerNumber, SessionIndex++);
+    }
+
+}
+void UMyGameInstance::JoinGame(int32 SessionIndex) {
+
 }
