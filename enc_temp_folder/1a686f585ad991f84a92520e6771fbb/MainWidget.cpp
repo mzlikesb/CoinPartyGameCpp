@@ -14,9 +14,9 @@
 void UMainWidget::NativeConstruct() {
     Super::NativeConstruct();
 
-    //CreateButton->OnClicked.AddDynamic(this, &UMainWidget::CreateGame);
-    //FindButton->OnClicked.AddDynamic(this, &UMainWidget::FindSessions);
-    //ExitButton->OnClicked.AddDynamic(this, &UMainWidget::Exit);
+    CreateButton->OnClicked.AddDynamic(this, &UMainWidget::CreateGame);
+    FindButton->OnClicked.AddDynamic(this, &UMainWidget::FindSessions);
+    ExitButton->OnClicked.AddDynamic(this, &UMainWidget::OnClickExitButton);
 
 }
 
@@ -54,7 +54,7 @@ void UMainWidget::JoinSessions(int32 SessionIndex) {
     }
 }
 
-void UMainWidget::Exit() {
+void UMainWidget::OnClickExitButton() {
     UWorld* World = GetWorld();
     if (World)
     {

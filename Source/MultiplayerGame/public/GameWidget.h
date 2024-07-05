@@ -15,9 +15,19 @@ class MULTIPLAYERGAME_API UGameWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	UFUNCTION(BlueprintCallable)
-	FName GetConnectionMode();
 
-	UFUNCTION(BlueprintCallable)
-	FName GetSessionName();
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	class UTextBlock* RoomName;
+	
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	class UTextBlock* ConnectionMode;
+
+
+	FText GetConnectionMode();
+
+	FText GetSessionName();
+
+protected:
+	virtual void NativeConstruct() override;
+
 };

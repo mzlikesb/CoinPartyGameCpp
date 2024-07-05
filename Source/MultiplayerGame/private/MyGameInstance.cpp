@@ -24,8 +24,10 @@ void UMyGameInstance::CreateGame(FName SessionName){
         if (Sessions.IsValid())
         {
             SessionSettings = MakeShareable(new FOnlineSessionSettings());
-            SessionSettings->bIsLANMatch = true;
-            SessionSettings->NumPublicConnections = 4;
+            SessionSettings->bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
+            SessionSettings->NumPublicConnections = 4; 
+            SessionSettings->bShouldAdvertise = true;
+            SessionSettings->bUsesPresence = true;
 
             Sessions->OnCreateSessionCompleteDelegates.AddUObject(this, &UMyGameInstance::OnCreateSessionComplete);
             Sessions->CreateSession(0, SessionName, *SessionSettings);
@@ -80,8 +82,8 @@ void UMyGameInstance::OnDestroySessionComplete(FName SessionName, bool bWasSucce
     }
 }
 
-FName UMyGameInstance::GetSessionName(){
-    return CurrentSessionName;
+FText UMyGameInstance::GetSessionName(){
+    return FText::FromName(CurrentSessionName);
 }
 
 void UMyGameInstance::FindGame() {
@@ -92,19 +94,33 @@ void UMyGameInstance::FindGame() {
         IOnlineSessionPtr Sessions = OnlineSubsystem->GetSessionInterface();
         if (Sessions.IsValid())
         {
-            SessionSearch = MakeShareable(new FOnlineSessionSearch());
-            SessionSearch->bIsLanQuery = true;
-            SessionSearch->MaxSearchResults = 20;
-            SessionSearch->PingBucketSize = 50;
 
-            Sessions->OnFindSessionsCompleteDelegates.AddUObject(this, &UMyGameInstance::OnFindSessionsComplete);
+            OnFindSessionsCompleteDelegateHandle = Sessions->AddOnFindSessionsCompleteDelegate_Handle(
+                FOnFindSessionsCompleteDelegate::CreateUObject(this, &UMyGameInstance::OnFindSessionsComplete)
+            );
+
+
+            SessionSearch = MakeShareable(new FOnlineSessionSearch());
+            SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
+            SessionSearch->MaxSearchResults = 20;
+
             Sessions->FindSessions(0, SessionSearch.ToSharedRef());
         }
     }
 }
 
 void UMyGameInstance::OnFindSessionsComplete(bool bWasSuccessful) {
-   
+    IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
+    if (OnlineSubsystem)
+    {
+        IOnlineSessionPtr Sessions = OnlineSubsystem->GetSessionInterface();
+        if (Sessions.IsValid())
+        {
+            // ????? ??
+            Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
+        }
+    }
+
     if (!bWasSuccessful)
     {
         UE_LOG(LogTemp, Log, TEXT("Find Sessions failed."));
@@ -113,13 +129,17 @@ void UMyGameInstance::OnFindSessionsComplete(bool bWasSuccessful) {
 
     TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
     UE_LOG(LogTemp, Log, TEXT("Find Sessions %d."), SearchResults.Num());
-    
+    if (GEngine)
+    {
+        FString DebugMessage = FString::Printf(TEXT("Find Sessions %d."), SearchResults.Num());
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, DebugMessage);
+    }
     int32 SessionIndex = 0;
     for(const FOnlineSessionSearchResult result : SearchResults) {
         FString SessionName = result.Session.OwningUserName;
         int32 MaxPlayerNumber = result.Session.SessionSettings.NumPublicConnections;
         int32 CurrentPlayerNumber = result.Session.NumOpenPublicConnections;
-        onFoundSessions.Broadcast(SessionName, MaxPlayerNumber, CurrentPlayerNumber, SessionIndex++);
+        //onFoundSessions.Broadcast(SessionName, MaxPlayerNumber, CurrentPlayerNumber, SessionIndex++);
     }
 
 }

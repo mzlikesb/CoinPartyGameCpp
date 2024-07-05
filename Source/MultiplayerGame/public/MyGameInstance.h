@@ -22,11 +22,9 @@ class MULTIPLAYERGAME_API UMyGameInstance : public UGameInstance
 public:
 	virtual void Init() override;
 
-	UFUNCTION(BlueprintCallable)
 	void CreateGame(FName SessionName);
 
-	UFUNCTION(BlueprintCallable)
-	FName GetSessionName();
+	FText GetSessionName();
 
 	void FindGame();
 	void JoinGame(int32 SessionIndex);
@@ -36,7 +34,6 @@ public:
 	void SaveData();
 	void LoadData();
 
-	UPROPERTY(EditAnywhere, BlueprintAssignable)
 	FonFoundSessions onFoundSessions;
 
 protected:
@@ -51,5 +48,6 @@ private:
     TSharedPtr<FOnlineSessionSettings> SessionSettings;
 	FName CurrentSessionName;
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
+	FDelegateHandle OnFindSessionsCompleteDelegateHandle;
 
 };

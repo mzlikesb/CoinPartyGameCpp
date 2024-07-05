@@ -4,23 +4,29 @@
 #include "GameWidget.h"
 #include "MyGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/TextBlock.h"
 
+void UGameWidget::NativeConstruct() {
+    Super::NativeConstruct();
 
-
-FName UGameWidget::GetConnectionMode() {
-    APlayerController* OwningPlayer = GetOwningPlayer<APlayerController>();
-    if (OwningPlayer->HasAuthority()) {
-        return TEXT("Server");
-    }
-    return TEXT("Client");
+    RoomName->SetText(GetSessionName());
+    ConnectionMode->SetText(GetConnectionMode());
 }
 
-FName UGameWidget::GetSessionName() {
+FText UGameWidget::GetConnectionMode() {
+    APlayerController* OwningPlayer = GetOwningPlayer<APlayerController>();
+    if (OwningPlayer->HasAuthority()) {
+        return FText::FromString(TEXT("Server"));
+    }
+    return FText::FromString(TEXT("Client"));
+}
+
+FText UGameWidget::GetSessionName() {
     UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
     if (GI) {
         return GI->GetSessionName();
     }
 
-    return TEXT("Not Found SessionName");
+    return  FText::FromString(TEXT("Not Found SessionName"));
 }

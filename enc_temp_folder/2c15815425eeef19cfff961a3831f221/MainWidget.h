@@ -29,23 +29,20 @@ public:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
 	class UEditableText* GameName;
 
-	UFUNCTION(BlueprintCallable)
 	void CreateGame();
 
-	UFUNCTION(BlueprintCallable)
 	void FindSessions();
 
-	UFUNCTION(BlueprintCallable)
 	void JoinSessions(int32 SessionIndex);
 
-	UFUNCTION(BlueprintCallable)
-	void Exit();
+
 protected:
 
 	virtual void NativeConstruct() override;
 
 	void OnFoundSessions(FString SessionName, int32 MaxPlayers, int32 CurrentPlayers, int32 SessionIndex);
 
+	void OnClickExitButton();
 
 
 };
