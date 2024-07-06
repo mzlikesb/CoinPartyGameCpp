@@ -1,9 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "MyGameInstance.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
+#include "OnlineSubsystemUtils.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Online/OnlineSessionNames.h"
 #include "Engine/Engine.h"
@@ -14,26 +15,41 @@ void UMyGameInstance::Init()
 	Super::Init();
 }
 
-void UMyGameInstance::CreateGame(FName SessionName){
+void UMyGameInstance::CreateGame(){
     
+    /*
     IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
-    
-    if(OnlineSubsystem){
+    if (!OnlineSubsystem)return;
+    IOnlineSessionPtr Sessions = OnlineSubsystem->GetSessionInterface();
+    if (!Sessions.IsValid())return;
+    */
 
-        IOnlineSessionPtr Sessions = OnlineSubsystem->GetSessionInterface();
-        if (Sessions.IsValid())
-        {
-            SessionSettings = MakeShareable(new FOnlineSessionSettings());
-            SessionSettings->bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
-            SessionSettings->NumPublicConnections = 4; 
-            SessionSettings->bShouldAdvertise = true;
-            SessionSettings->bUsesPresence = true;
+    //https://unrealcommunity.wiki/online-multiplayer-vkje2zyn
 
-            Sessions->OnCreateSessionCompleteDelegates.AddUObject(this, &UMyGameInstance::OnCreateSessionComplete);
-            Sessions->CreateSession(0, SessionName, *SessionSettings);
-        }
+    const IOnlineSessionPtr Sessions = Online::GetSessionInterface(GetWorld());
+
+    if (!Sessions.IsValid())
+    {
+        return;
     }
-    
+
+    SessionSettings = MakeShareable(new FOnlineSessionSettings());
+    SessionSettings->NumPrivateConnections = 0;
+    SessionSettings->NumPublicConnections = 4;
+    SessionSettings->bAllowInvites = true;
+    SessionSettings->bAllowJoinInProgress = true;
+    SessionSettings->bAllowJoinViaPresence = true;
+    SessionSettings->bAllowJoinViaPresenceFriendsOnly = true;
+    SessionSettings->bIsDedicated = false;
+    SessionSettings->bUsesPresence = true;
+    SessionSettings->bIsLANMatch = true;
+    SessionSettings->bShouldAdvertise = true;
+
+    const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+
+    Sessions->OnCreateSessionCompleteDelegates.AddUObject(this, &UMyGameInstance::OnCreateSessionComplete);
+    Sessions->CreateSession(*localPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings); 
+
 }
 
 void UMyGameInstance::EndGame(){
@@ -66,7 +82,16 @@ void UMyGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucces
     {
         UE_LOG(LogTemp, Log, TEXT("Session created successfully! : %s"), *SessionName.ToString());
         CurrentSessionName = SessionName;
-        UGameplayStatics::OpenLevel(GetWorld(), FName("Game"));
+        
+        const IOnlineSessionPtr sessionInterface = Online::GetSessionInterface(GetWorld());
+
+        if (!sessionInterface.IsValid())
+        {
+            return;
+        }
+        //sessionInterface->StartSession(NAME_GameSession);
+
+        UGameplayStatics::OpenLevel(GetWorld(), FName("Game?Listen"));
     }
     else
     {
@@ -99,25 +124,43 @@ void UMyGameInstance::FindGame() {
                 FOnFindSessionsCompleteDelegate::CreateUObject(this, &UMyGameInstance::OnFindSessionsComplete)
             );
 
-
             SessionSearch = MakeShareable(new FOnlineSessionSearch());
-            SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
+            SessionSearch->bIsLanQuery = true;
             SessionSearch->MaxSearchResults = 20;
+            SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 
-            Sessions->FindSessions(0, SessionSearch.ToSharedRef());
+            //Sessions->FindSessions(0, SessionSearch.ToSharedRef());
+            const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+            if (Sessions->FindSessions(*localPlayer->GetPreferredUniqueNetId(), SessionSearch.ToSharedRef()))
+            {
+                if (GEngine)
+                {
+                    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Finding sessions..."));
+                }
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("Failed to start session search"));
+                if (GEngine)
+                {
+                    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Failed to start finding sessions."));
+                }
+            }
         }
     }
 }
 
 void UMyGameInstance::OnFindSessionsComplete(bool bWasSuccessful) {
+    
+    onFoundSessions.Broadcast();
+    
     IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
     if (OnlineSubsystem)
     {
         IOnlineSessionPtr Sessions = OnlineSubsystem->GetSessionInterface();
         if (Sessions.IsValid())
         {
-            // ????? ??
-            Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
+            Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);      
         }
     }
 
@@ -139,10 +182,31 @@ void UMyGameInstance::OnFindSessionsComplete(bool bWasSuccessful) {
         FString SessionName = result.Session.OwningUserName;
         int32 MaxPlayerNumber = result.Session.SessionSettings.NumPublicConnections;
         int32 CurrentPlayerNumber = result.Session.NumOpenPublicConnections;
-        //onFoundSessions.Broadcast(SessionName, MaxPlayerNumber, CurrentPlayerNumber, SessionIndex++);
+        onFoundSession.Broadcast(SessionName, MaxPlayerNumber, CurrentPlayerNumber, SessionIndex++);
     }
 
 }
 void UMyGameInstance::JoinGame(int32 SessionIndex) {
+    IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
+    if (OnlineSubsystem)
+    {
+        IOnlineSessionPtr Sessions = OnlineSubsystem->GetSessionInterface();
+        if (Sessions.IsValid())
+        {
+            const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+            if (Sessions->JoinSession(*localPlayer->GetPreferredUniqueNetId(), NAME_GameSession, SessionSearch->SearchResults[SessionIndex])) {
 
+                if (GEngine)
+                {
+                    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Join session..."));
+                }
+            }
+            else {
+                if (GEngine)
+                {
+                    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Fail to Join session"));
+                }
+            }
+        }
+    }
 }

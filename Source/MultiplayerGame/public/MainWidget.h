@@ -11,6 +11,7 @@
 /**
  * 
  */
+
 UCLASS()
 class MULTIPLAYERGAME_API UMainWidget : public UUserWidget
 {
@@ -27,7 +28,13 @@ public:
 	class UButton* ExitButton;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
-	class UEditableText* GameName;
+	class UEditableText* PlayerName;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	class UVerticalBox* SessionList;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UButtonWidget> ButtonWidget;
 
 	UFUNCTION(BlueprintCallable)
 	void CreateGame();
@@ -40,11 +47,16 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Exit();
+
+	UFUNCTION()
+	void OnFoundSession(FString SessionName, int32 MaxPlayers, int32 CurrentPlayers, int32 SessionIndex);
+	UFUNCTION()
+	void OnFoundSessions();
+
 protected:
 
 	virtual void NativeConstruct() override;
 
-	void OnFoundSessions(FString SessionName, int32 MaxPlayers, int32 CurrentPlayers, int32 SessionIndex);
 
 
 

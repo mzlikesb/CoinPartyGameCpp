@@ -12,7 +12,8 @@
 /**
  * 
  */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FonFoundSessions, FString, SessionName, int32, MaxPlayers, int32, CurrentPlayers, int32, SessionIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FonFoundSessions);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FonFoundSession, FString, SessionName, int32, MaxPlayers, int32, CurrentPlayers, int32, SessionIndex);
 
 UCLASS()
 class MULTIPLAYERGAME_API UMyGameInstance : public UGameInstance
@@ -22,7 +23,7 @@ class MULTIPLAYERGAME_API UMyGameInstance : public UGameInstance
 public:
 	virtual void Init() override;
 
-	void CreateGame(FName SessionName);
+	void CreateGame();
 
 	FText GetSessionName();
 
@@ -33,11 +34,18 @@ public:
 
 	void SaveData();
 	void LoadData();
-
+	
+	UPROPERTY()
+	FonFoundSession onFoundSession;
+	
+	UPROPERTY()
 	FonFoundSessions onFoundSessions;
 
 protected:
     virtual void Shutdown() override;
+
+	//UPROPERTY(EditAnywhere)
+	//TSubclassOf<class USessionSlotWidget> slotWidget;
 
 private:
 
@@ -45,8 +53,8 @@ private:
 	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);
 
-    TSharedPtr<FOnlineSessionSettings> SessionSettings;
 	FName CurrentSessionName;
+    TSharedPtr<FOnlineSessionSettings> SessionSettings;
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 	FDelegateHandle OnFindSessionsCompleteDelegateHandle;
 
