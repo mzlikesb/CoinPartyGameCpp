@@ -22,10 +22,16 @@ public:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
 	class UTextBlock* ConnectionMode;
 
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	class UButton* ExitButton;
+
 
 	FText GetConnectionMode();
 
 	FText GetSessionName();
+
+	UFUNCTION()
+	void ExitGame();
 
 protected:
 	virtual void NativeConstruct() override;

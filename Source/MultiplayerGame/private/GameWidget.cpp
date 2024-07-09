@@ -5,12 +5,14 @@
 #include "MyGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 
 void UGameWidget::NativeConstruct() {
     Super::NativeConstruct();
 
     RoomName->SetText(GetSessionName());
     ConnectionMode->SetText(GetConnectionMode());
+    ExitButton->OnClicked.AddDynamic(this, &UGameWidget::ExitGame);
 }
 
 FText UGameWidget::GetConnectionMode() {
@@ -29,4 +31,9 @@ FText UGameWidget::GetSessionName() {
     }
 
     return  FText::FromString(TEXT("Not Found SessionName"));
+}
+
+void UGameWidget::ExitGame() {
+    UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+    if (GI) GI->EndGame();
 }

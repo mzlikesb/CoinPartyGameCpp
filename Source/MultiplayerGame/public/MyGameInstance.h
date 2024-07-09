@@ -10,7 +10,7 @@
 #include "MyGameInstance.generated.h"
 
 /**
- * 
+ *
  */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FonFoundSessions);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FonFoundSession, FString, SessionName, int32, MaxPlayers, int32, CurrentPlayers, int32, SessionIndex);
@@ -19,43 +19,41 @@ UCLASS()
 class MULTIPLAYERGAME_API UMyGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual void Init() override;
 
-	void CreateGame();
+	void CreateGame(FString roomName);
 
 	FText GetSessionName();
 
 	void FindGame();
-	void JoinGame(int32 SessionIndex);
+	void JoinGame(int32 sessionIndex);
 	void EndGame();
 	void RestartGame();
 
 	void SaveData();
 	void LoadData();
-	
+
 	UPROPERTY()
 	FonFoundSession onFoundSession;
-	
+
 	UPROPERTY()
 	FonFoundSessions onFoundSessions;
 
 protected:
-    virtual void Shutdown() override;
-
-	//UPROPERTY(EditAnywhere)
-	//TSubclassOf<class USessionSlotWidget> slotWidget;
+	virtual void Shutdown() override;
 
 private:
 
-    void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
-	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
-	void OnFindSessionsComplete(bool bWasSuccessful);
+	void OnCreatedSession(FName sessionName, bool bWasSuccessful);
+	void OnDestroyedSession(FName sessionName, bool bWasSuccessful);
+	void OnFoundSessions(bool bWasSuccessful);
+	void OnJoinedSession(FName sessionName, EOnJoinSessionCompleteResult::Type result);
 
-	FName CurrentSessionName;
-    TSharedPtr<FOnlineSessionSettings> SessionSettings;
-	TSharedPtr<FOnlineSessionSearch> SessionSearch;
-	FDelegateHandle OnFindSessionsCompleteDelegateHandle;
+	IOnlineSessionPtr sessionInterface;
+	FName currentSessionName;
+	TSharedPtr<FOnlineSessionSettings> sessionSettings;
+	TSharedPtr<FOnlineSessionSearch> sessionSearch;
 
 };

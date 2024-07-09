@@ -68,6 +68,7 @@ void UMyGameInstance::OnCreatedSession(FName SessionName, bool bWasSuccessful)
     if (bWasSuccessful)
     {
         UE_LOG(LogTemp, Log, TEXT("Session created successfully! : %s"), *SessionName.ToString());
+        currentSessionName = SessionName;
 
         GetWorld()->ServerTravel("Game?Listen", true);
     }
@@ -131,7 +132,7 @@ void UMyGameInstance::OnFoundSessions(bool bWasSuccessful) {
 void UMyGameInstance::JoinGame(int32 SessionIndex) {
 
     FString sessionName;
-    sessionSearch->SearchResults[SessionIndex].Session.SessionSettings.Get(FName("ROOM_NAME"), sessionName);
+    sessionSearch->SearchResults[SessionIndex].Session.SessionSettings.Get(FName("SESSION_NAME"), sessionName);
 
     if (sessionInterface->JoinSession(0, FName(*sessionName), sessionSearch->SearchResults[SessionIndex])) {
 
@@ -143,41 +144,7 @@ void UMyGameInstance::JoinGame(int32 SessionIndex) {
 }
 
 void UMyGameInstance::OnJoinedSession(FName sessionName, EOnJoinSessionCompleteResult::Type result) {
-    
+    currentSessionName = sessionName;
+
     UE_LOG(LogTemp, Error, TEXT("join session %s"), *sessionName.ToString());
-
-    switch (result)
-    {
-    case EOnJoinSessionCompleteResult::Success:
-    {
-        currentSessionName = sessionName;
-        UE_LOG(LogTemp, Warning, TEXT("Join Success!"));
-
-        APlayerController* pc = GetWorld()->GetFirstPlayerController();
-        FString url;
-        sessionInterface->GetResolvedConnectString(sessionName, url, NAME_GamePort);
-        UE_LOG(LogTemp, Warning, TEXT("url: %s"), *url);
-
-        pc->ClientTravel(url, ETravelType::TRAVEL_Absolute);
-
-        break;
-    }
-    case EOnJoinSessionCompleteResult::SessionIsFull:
-        UE_LOG(LogTemp, Warning, TEXT("Session is full..."));
-        break;
-    case EOnJoinSessionCompleteResult::SessionDoesNotExist:
-        UE_LOG(LogTemp, Warning, TEXT("Session Does Not Exist..."));
-        break;
-    case EOnJoinSessionCompleteResult::CouldNotRetrieveAddress:
-        UE_LOG(LogTemp, Warning, TEXT("Could Not Retrieve Address..."));
-        break;
-    case EOnJoinSessionCompleteResult::AlreadyInSession:
-        UE_LOG(LogTemp, Warning, TEXT("You are already in this session..."));
-        break;
-    case EOnJoinSessionCompleteResult::UnknownError:
-        UE_LOG(LogTemp, Warning, TEXT("Unknown Error occurred!"));
-        break;
-    default:
-        break;
-    }
 }

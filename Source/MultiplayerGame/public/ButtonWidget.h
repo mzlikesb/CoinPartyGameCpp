@@ -23,7 +23,7 @@ public:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
 	class UTextBlock* ButtonText;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintAssignable)
 	FonClick onClick;
 
 	UFUNCTION()

@@ -37,7 +37,7 @@ void UMainWidget::CreateGame(){
     UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
     
     if(GI){
-        GI->CreateGame();
+        GI->CreateGame("MyGame");
     }
 }
 
