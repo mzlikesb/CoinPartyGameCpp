@@ -10,7 +10,7 @@
 void UGameWidget::NativeConstruct() {
     Super::NativeConstruct();
 
-    RoomName->SetText(GetSessionName());
+    RoomName->SetText(GetRoomName());
     ConnectionMode->SetText(GetConnectionMode());
     ExitButton->OnClicked.AddDynamic(this, &UGameWidget::ExitGame);
 }
@@ -23,11 +23,11 @@ FText UGameWidget::GetConnectionMode() {
     return FText::FromString(TEXT("Client"));
 }
 
-FText UGameWidget::GetSessionName() {
+FText UGameWidget::GetRoomName() {
     UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
     if (GI) {
-        return GI->GetSessionName();
+        return GI->GetRoomName();
     }
 
     return  FText::FromString(TEXT("Not Found SessionName"));

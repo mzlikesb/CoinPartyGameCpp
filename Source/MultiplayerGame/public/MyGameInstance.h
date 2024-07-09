@@ -25,7 +25,7 @@ public:
 
 	void CreateGame(FString roomName);
 
-	FText GetSessionName();
+	FText GetRoomName();
 
 	void FindGame();
 	void JoinGame(int32 sessionIndex);
@@ -53,6 +53,7 @@ private:
 
 	IOnlineSessionPtr sessionInterface;
 	FName currentSessionName;
+	FName currentRoomName;
 	TSharedPtr<FOnlineSessionSettings> sessionSettings;
 	TSharedPtr<FOnlineSessionSearch> sessionSearch;
 

@@ -28,7 +28,7 @@ public:
 
 	FText GetConnectionMode();
 
-	FText GetSessionName();
+	FText GetRoomName();
 
 	UFUNCTION()
 	void ExitGame();

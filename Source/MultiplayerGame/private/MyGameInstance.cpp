@@ -43,6 +43,7 @@ void UMyGameInstance::CreateGame(FString roomName) {
     sessionSettings->bShouldAdvertise = true;
 
     currentSessionName = NAME_GameSession;
+    currentRoomName = FName(*roomName);
 
     sessionSettings->Set(FName("ROOM_NAME"), roomName, EOnlineDataAdvertisementType::ViaOnlineService);
 
@@ -85,8 +86,8 @@ void UMyGameInstance::OnDestroyedSession(FName SessionName, bool bWasSuccessful)
     }
 }
 
-FText UMyGameInstance::GetSessionName() {
-    return FText::FromName(currentSessionName);
+FText UMyGameInstance::GetRoomName() {
+    return FText::FromName(currentRoomName);
 }
 
 void UMyGameInstance::FindGame() {
@@ -122,7 +123,7 @@ void UMyGameInstance::OnFoundSessions(bool bWasSuccessful) {
         FString roomName;
         results[i].Session.SessionSettings.Get(FName("ROOM_NAME"), roomName);
         int32 maxPlayerNumber = results[i].Session.SessionSettings.NumPublicConnections;
-        int32 currentPlayerNumber = results[i].Session.NumOpenPublicConnections;
+        int32 currentPlayerNumber = maxPlayerNumber - results[i].Session.NumOpenPublicConnections;
         onFoundSession.Broadcast(roomName, maxPlayerNumber, currentPlayerNumber, i);
     }
 

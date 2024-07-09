@@ -43,6 +43,7 @@ void UMainWidget::CreateGame(){
 
 void UMainWidget::FindSessions() {
     FindButton->SetIsEnabled(false);
+    SessionList->ClearChildren();
     
     UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
