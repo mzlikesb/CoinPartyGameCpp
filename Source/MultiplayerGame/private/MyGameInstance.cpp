@@ -131,15 +131,17 @@ void UMyGameInstance::OnFoundSessions(bool bWasSuccessful) {
 }
 void UMyGameInstance::JoinGame(int32 SessionIndex) {
 
-    FString sessionName;
-    sessionSearch->SearchResults[SessionIndex].Session.SessionSettings.Get(FName("ROOM_NAME"), sessionName);
+    FString roomName;
+    sessionSearch->SearchResults[SessionIndex].Session.SessionSettings.Get(FName("ROOM_NAME"), roomName);
+    
+    currentRoomName = FName(*roomName);
+    
+    if (sessionInterface->JoinSession(0, FName(*roomName), sessionSearch->SearchResults[SessionIndex])) {
 
-    if (sessionInterface->JoinSession(0, FName(*sessionName), sessionSearch->SearchResults[SessionIndex])) {
-
-        UE_LOG(LogTemp, Error, TEXT("join session %s ..."), *sessionName);
+        UE_LOG(LogTemp, Error, TEXT("join session %s ..."), *roomName);
     }
     else {
-        UE_LOG(LogTemp, Error, TEXT("Fail to join %s ..."), *sessionName);
+        UE_LOG(LogTemp, Error, TEXT("Fail to join %s ..."), *roomName);
     }
 }
 
@@ -147,11 +149,12 @@ void UMyGameInstance::OnJoinedSession(FName sessionName, EOnJoinSessionCompleteR
     
     UE_LOG(LogTemp, Error, TEXT("join session %s"), *sessionName.ToString());
 
+    currentSessionName = sessionName;
+
     switch (result)
     {
     case EOnJoinSessionCompleteResult::Success:
     {
-        currentSessionName = sessionName;
         UE_LOG(LogTemp, Warning, TEXT("Join Success!"));
 
         APlayerController* pc = GetWorld()->GetFirstPlayerController();
@@ -164,21 +167,24 @@ void UMyGameInstance::OnJoinedSession(FName sessionName, EOnJoinSessionCompleteR
         break;
     }
     case EOnJoinSessionCompleteResult::SessionIsFull:
-        UE_LOG(LogTemp, Warning, TEXT("Session is full..."));
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Session is Full"));
         break;
-    case EOnJoinSessionCompleteResult::SessionDoesNotExist:
-        UE_LOG(LogTemp, Warning, TEXT("Session Does Not Exist..."));
-        break;
-    case EOnJoinSessionCompleteResult::CouldNotRetrieveAddress:
-        UE_LOG(LogTemp, Warning, TEXT("Could Not Retrieve Address..."));
-        break;
-    case EOnJoinSessionCompleteResult::AlreadyInSession:
-        UE_LOG(LogTemp, Warning, TEXT("You are already in this session..."));
-        break;
-    case EOnJoinSessionCompleteResult::UnknownError:
-        UE_LOG(LogTemp, Warning, TEXT("Unknown Error occurred!"));
-        break;
+    }
     default:
+        UE_LOG(LogTemp, Warning, TEXT("error"));
         break;
     }
 }
+
+void UMyGameInstance::SetPlayerName(FString name) { PlayerData.Name = name; }
+
+FString UMyGameInstance::GetPlayerName() { return PlayerData.Name; }
+
+void UMyGameInstance::SetPlayerHatType(EHatType type) { PlayerData.HatType = type; }
+
+EHatType UMyGameInstance::GetPlayerHatType() { return PlayerData.HatType; }
+
+void UMyGameInstance::SetPlayerColor(FLinearColor color) { PlayerData.Color = color; }
+
+FLinearColor UMyGameInstance::GetPlayeColor() { return PlayerData.Color; }

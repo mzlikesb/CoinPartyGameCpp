@@ -10,16 +10,23 @@
 #include "GameFramework/PlayerController.h"
 #include "Components/Button.h"
 #include "Components/EditableText.h"
-#include "ButtonWidget.h"
+#include "Components/ComboBoxString.h"
+#include "Components/Slider.h"
 #include "Components/VerticalBox.h"
+#include "ButtonWidget.h"
+#include "MyCharacter.h"
 
 void UMainWidget::NativeConstruct() {
     Super::NativeConstruct();
 
+    PlayerName->OnTextCommitted.AddDynamic(this, &UMainWidget::SetName);
+    HatOption->OnSelectionChanged.AddDynamic(this, &UMainWidget::SetHatType);
+    ColorSlider->OnValueChanged.AddDynamic(this, &UMainWidget::SetColor);
+
     CreateButton->OnClicked.AddDynamic(this, &UMainWidget::CreateGame);
     FindButton->OnClicked.AddDynamic(this, &UMainWidget::FindSessions);
     ExitButton->OnClicked.AddDynamic(this, &UMainWidget::Exit);
-    
+
     UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
     if (GI) {
@@ -30,14 +37,14 @@ void UMainWidget::NativeConstruct() {
 }
 
 void UMainWidget::CreateGame(){
-    CreateButton->SetIsEnabled(false);
+    if (RoomName->GetText().IsEmpty() || PlayerName->GetText().IsEmpty()) return;
 
-    if (PlayerName->GetText().IsEmpty()) return;
+    CreateButton->SetIsEnabled(false);
 
     UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
     
     if(GI){
-        GI->CreateGame("MyGame");
+        GI->CreateGame(RoomName->GetText().ToString());
     }
 }
 
@@ -89,4 +96,55 @@ void UMainWidget::Exit() {
             PlayerController->ConsoleCommand("quit");
         }
     }
+}
+
+void UMainWidget::SetName(const FText& Text, ETextCommit::Type CommitMethod) {
+    if (Text.IsEmpty()) return;
+
+    UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+
+    if (GI) {
+        GI->SetPlayerName(Text.ToString());
+    }
+}
+
+EHatType UMainWidget::StringToEHatType(const FString& String)
+{
+    if (String == "NoHat") return EHatType::NoHat;
+    if (String == "Apple") return EHatType::Apple;
+    if (String == "Banana") return EHatType::Banana;
+    if (String == "Carrot") return EHatType::Carrot;
+
+    return EHatType::NoHat;
+}
+
+void UMainWidget::SetHatType(FString SelectedItem, ESelectInfo::Type SelectionType) {
+    UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+
+    EHatType type = StringToEHatType(SelectedItem);
+    if (GI) {
+        GI->SetPlayerHatType(type);
+    }
+
+    APlayerController* pc = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    if (!pc) return;
+    AMyCharacter* character = Cast<AMyCharacter>(pc->GetPawn());
+
+    character->SetPlayerHat(type);
+}
+
+void UMainWidget::SetColor(float value) {
+    UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+
+    // HSV to LinearColor
+    FLinearColor color = FLinearColor::MakeFromHSV8(static_cast<uint8>(value*255), static_cast<uint8>(255), static_cast<uint8>(255));
+    if (GI) {
+        GI->SetPlayerColor(color);
+    }
+
+    APlayerController* pc = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    if (!pc) return;
+    AMyCharacter* character = Cast<AMyCharacter>(pc->GetPawn());
+
+    character->SetPlayerColor(color);
 }

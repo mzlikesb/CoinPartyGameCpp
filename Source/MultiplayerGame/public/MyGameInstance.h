@@ -7,6 +7,7 @@
 #include "OnlineSubSystem.h"
 #include "OnlineSessionSettings.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "PlayerData.h"
 #include "MyGameInstance.generated.h"
 
 /**
@@ -41,8 +42,29 @@ public:
 	UPROPERTY()
 	FonFoundSessions onFoundSessions;
 
+	UFUNCTION()
+	void SetPlayerName(FString name);
+
+	UFUNCTION()
+	FString GetPlayerName();
+
+	UFUNCTION()
+	void SetPlayerHatType(EHatType type);
+
+	UFUNCTION()
+	EHatType GetPlayerHatType();
+
+	UFUNCTION()
+	void SetPlayerColor(FLinearColor color);
+
+	UFUNCTION()
+	FLinearColor GetPlayeColor();
+
 protected:
 	virtual void Shutdown() override;
+
+	UPROPERTY(VisibleAnyWhere)
+	FPlayerData PlayerData;
 
 private:
 
