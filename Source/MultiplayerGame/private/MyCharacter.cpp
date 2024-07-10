@@ -22,8 +22,8 @@ void AMyCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	UMyGameInstance* gi = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-
-	if (gi && GetController()->IsLocalPlayerController()) {
+	AController* pc = GetController();
+	if (gi && pc && pc->IsLocalPlayerController()) {
 		SetPlayerHat(gi->GetPlayerHatType());
 		SetPlayerColor(gi->GetPlayerColor());
 	}
