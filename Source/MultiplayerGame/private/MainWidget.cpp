@@ -19,6 +19,24 @@
 void UMainWidget::NativeConstruct() {
     Super::NativeConstruct();
 
+    UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+
+    if (GI) {
+
+        GI->onFoundSession.AddDynamic(this, &UMainWidget::OnFoundSession);
+        GI->onFoundSessions.AddDynamic(this, &UMainWidget::OnFoundSessions);
+        
+        PlayerName->SetText(FText::FromString(GI->GetPlayerName()));
+        FString type;
+        const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EHatType"), true);
+        if (!EnumPtr)
+        {
+            type = EnumPtr->GetNameStringByValue(static_cast<int64>(GI->GetPlayerHatType()));
+            HatOption->SetSelectedOption(type);
+        }
+        ColorSlider->SetValue(GI->GetPlayerColor().LinearRGBToHSV().R / 360.0f);
+    }
+
     PlayerName->OnTextCommitted.AddDynamic(this, &UMainWidget::SetName);
     HatOption->OnSelectionChanged.AddDynamic(this, &UMainWidget::SetHatType);
     ColorSlider->OnValueChanged.AddDynamic(this, &UMainWidget::SetColor);
@@ -27,13 +45,6 @@ void UMainWidget::NativeConstruct() {
     FindButton->OnClicked.AddDynamic(this, &UMainWidget::FindSessions);
     ExitButton->OnClicked.AddDynamic(this, &UMainWidget::Exit);
 
-    UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-
-    if (GI) {
-
-        GI->onFoundSession.AddDynamic(this, &UMainWidget::OnFoundSession);
-        GI->onFoundSessions.AddDynamic(this, &UMainWidget::OnFoundSessions);
-    }
 }
 
 void UMainWidget::CreateGame(){
@@ -137,7 +148,7 @@ void UMainWidget::SetColor(float value) {
     UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
     // HSV to LinearColor
-    FLinearColor color = FLinearColor::MakeFromHSV8(static_cast<uint8>(value*255), static_cast<uint8>(255), static_cast<uint8>(255));
+    FLinearColor color = FLinearColor::MakeFromHSV8(static_cast<uint8>(value*360.0f), static_cast<uint8>(255), static_cast<uint8>(255));
     if (GI) {
         GI->SetPlayerColor(color);
     }

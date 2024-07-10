@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "MyPlayerController.h"
 #include "MyGameMode.generated.h"
 
 /**
@@ -16,5 +17,15 @@ class MULTIPLAYERGAME_API AMyGameMode : public AGameMode
 	
 public:
 	AMyGameMode();
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	UFUNCTION()
+	void ReceivePlayerData(const FPlayerData& playerData);
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<FPlayerData> PlayerDatas;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<AMyPlayerController*> Players;
 
 };

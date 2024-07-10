@@ -187,4 +187,4 @@ EHatType UMyGameInstance::GetPlayerHatType() { return PlayerData.HatType; }
 
 void UMyGameInstance::SetPlayerColor(FLinearColor color) { PlayerData.Color = color; }
 
-FLinearColor UMyGameInstance::GetPlayeColor() { return PlayerData.Color; }
+FLinearColor UMyGameInstance::GetPlayerColor() { return PlayerData.Color; }

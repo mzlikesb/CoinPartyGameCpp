@@ -58,13 +58,14 @@ public:
 	void SetPlayerColor(FLinearColor color);
 
 	UFUNCTION()
-	FLinearColor GetPlayeColor();
+	FLinearColor GetPlayerColor();
+
+	UPROPERTY(VisibleAnyWhere)
+	FPlayerData PlayerData;
 
 protected:
 	virtual void Shutdown() override;
 
-	UPROPERTY(VisibleAnyWhere)
-	FPlayerData PlayerData;
 
 private:
 

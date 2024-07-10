@@ -3,6 +3,9 @@
 #include "MyPlayerController.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "MyGameInstance.h"
+#include "MyGameMode.h"
+#include "MyCharacter.h"
 
 
 void AMyPlayerController::BeginPlay(){
@@ -23,4 +26,25 @@ void AMyPlayerController::SetWidget(){
             }
         }
     }
+}
+
+void AMyPlayerController::RequestClientToSendPlayerData_Implementation() {
+
+    UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+    ServerReceivePlayerData(GI->PlayerData);
+}
+
+void AMyPlayerController::ServerReceivePlayerData_Implementation(const FPlayerData& playerData)
+{
+   AMyGameMode* gm = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+
+   this->PlayerData = playerData;
+   gm->ReceivePlayerData(playerData);
+}
+
+
+void AMyPlayerController::OnPossess(APawn* InPawn) {
+
+    Super::OnPossess(InPawn);
+
 }

@@ -29,7 +29,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(NetMulticast, Reliable)
 	void SetPlayerHat(EHatType type);
+
+	UFUNCTION(NetMulticast, Reliable)
 	void SetPlayerColor(FLinearColor color);
 
 };

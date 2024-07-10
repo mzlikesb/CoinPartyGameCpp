@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Blueprint/UserWidget.h"
+#include "PlayerData.h"
 #include "MyPlayerController.generated.h"
 
 /**
@@ -17,6 +18,17 @@ class MULTIPLAYERGAME_API AMyPlayerController : public APlayerController
 	
 public:
 	void BeginPlay() override;
+	
+	UFUNCTION(Client, Reliable)
+	void RequestClientToSendPlayerData();
+
+	UFUNCTION(Server, Reliable)
+	void ServerReceivePlayerData(const FPlayerData& playerData);
+
+	virtual void OnPossess(APawn* InPawn) override;
+
+	UPROPERTY()
+	FPlayerData PlayerData;
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)

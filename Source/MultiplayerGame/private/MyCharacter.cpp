@@ -2,6 +2,8 @@
 
 
 #include "MyCharacter.h"
+#include "MyGameInstance.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -11,6 +13,7 @@ AMyCharacter::AMyCharacter()
 
 	Hat = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Hat"));
 	Hat->SetupAttachment(GetMesh(), TEXT("head"));
+
 }
 
 // Called when the game starts or when spawned
@@ -18,6 +21,12 @@ void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	UMyGameInstance* gi = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+
+	if (gi && GetController()->IsLocalPlayerController()) {
+		SetPlayerHat(gi->GetPlayerHatType());
+		SetPlayerColor(gi->GetPlayerColor());
+	}
 }
 
 // Called every frame
@@ -34,7 +43,7 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 }
 
-void AMyCharacter::SetPlayerHat(EHatType type) {
+void AMyCharacter::SetPlayerHat_Implementation(EHatType type) {
 	if (!Hat) return;
 
 	FString path = "";
@@ -66,12 +75,16 @@ void AMyCharacter::SetPlayerHat(EHatType type) {
 	}
 }		
 
-void AMyCharacter::SetPlayerColor(FLinearColor color) {
+void AMyCharacter::SetPlayerColor_Implementation(FLinearColor color) {
 	USkeletalMeshComponent* skeletalMeshComp = GetMesh();
 	if (!skeletalMeshComp)return;
 
-	UMaterialInstanceDynamic* dynamicMaterial = skeletalMeshComp->CreateAndSetMaterialInstanceDynamic(0);
-	if (dynamicMaterial) {
-		dynamicMaterial->SetVectorParameterValue(FName("Tint"), color);
+	int materialNum = skeletalMeshComp->GetMaterials().Num();
+	for (int i = 0; i < materialNum; i++)
+	{
+		UMaterialInstanceDynamic* dynamicMaterial = skeletalMeshComp->CreateAndSetMaterialInstanceDynamic(i);
+		if (dynamicMaterial) {
+			dynamicMaterial->SetVectorParameterValue(FName("Tint"), color);
+		}
 	}
 }
