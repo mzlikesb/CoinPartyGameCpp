@@ -18,14 +18,20 @@ class MULTIPLAYERGAME_API AMyPlayerController : public APlayerController
 	
 public:
 	void BeginPlay() override;
-	
+
+	void OnPossess(APawn* InPawn) override;
+
 	UFUNCTION(Client, Reliable)
 	void RequestClientToSendPlayerData();
 
 	UFUNCTION(Server, Reliable)
-	void ServerReceivePlayerData(const FPlayerData& playerData);
+	void ServerReceivePlayerData(const FPlayerData& ReceivedPlayerData);
 
-	virtual void OnPossess(APawn* InPawn) override;
+	UFUNCTION(Server, Reliable)
+	void SendChat(const FText& Text);
+
+	UFUNCTION(Client, Reliable)
+	void ReceiveChat(const FText& Text);
 
 	UPROPERTY()
 	FPlayerData PlayerData;
@@ -33,6 +39,9 @@ public:
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TSubclassOf<UUserWidget> WidgetClass;
+
+	UPROPERTY()
+	UUserWidget* MainWidget;
 
 	void SetWidget();
 

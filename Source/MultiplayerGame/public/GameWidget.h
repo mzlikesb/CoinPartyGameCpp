@@ -25,10 +25,22 @@ public:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
 	class UButton* ExitButton;
 
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	class UEditableText* ChatText;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	class UVerticalBox* ChatList;
 
 	FText GetConnectionMode();
 
 	FText GetRoomName();
+
+	UFUNCTION()
+	void SendChat(const FText& Text, ETextCommit::Type CommitMethod);
+
+	UFUNCTION()
+	void ReceiveChat(const FText& Text);
+
 
 	UFUNCTION()
 	void ExitGame();

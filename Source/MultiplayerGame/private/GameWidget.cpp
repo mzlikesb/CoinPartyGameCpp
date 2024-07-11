@@ -6,6 +6,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Components/EditableText.h"
+#include "MyPlayerController.h"
+#include "Components/VerticalBox.h"
 
 void UGameWidget::NativeConstruct() {
     Super::NativeConstruct();
@@ -13,6 +16,8 @@ void UGameWidget::NativeConstruct() {
     RoomName->SetText(GetRoomName());
     ConnectionMode->SetText(GetConnectionMode());
     ExitButton->OnClicked.AddDynamic(this, &UGameWidget::ExitGame);
+
+    ChatText->OnTextCommitted.AddDynamic(this, &UGameWidget::SendChat);
 }
 
 FText UGameWidget::GetConnectionMode() {
@@ -36,4 +41,20 @@ FText UGameWidget::GetRoomName() {
 void UGameWidget::ExitGame() {
     UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
     if (GI) GI->EndGame();
+}
+
+void UGameWidget::SendChat(const FText& Text, ETextCommit::Type CommitMethod) {
+    if (ChatText->GetText().IsEmpty() || CommitMethod != ETextCommit::OnEnter) return;
+
+    AMyPlayerController* PC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+    if (PC) {
+        PC->SendChat(Text);
+    }
+    ChatText->SetText(FText::GetEmpty());
+}
+
+void UGameWidget::ReceiveChat(const FText& Text) {
+    UTextBlock* Chat = NewObject<UTextBlock>(this);
+    Chat->SetText(Text);
+    ChatList->AddChild(Chat);
 }

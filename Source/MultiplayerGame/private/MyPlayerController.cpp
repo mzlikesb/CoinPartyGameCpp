@@ -6,6 +6,7 @@
 #include "MyGameInstance.h"
 #include "MyGameMode.h"
 #include "MyCharacter.h"
+#include "GameWidget.h"
 
 
 void AMyPlayerController::BeginPlay(){
@@ -23,6 +24,7 @@ void AMyPlayerController::SetWidget(){
             if (Widget) {
                 Widget->AddToViewport();
                 bShowMouseCursor = true;
+                MainWidget = Widget;
             }
         }
     }
@@ -34,12 +36,12 @@ void AMyPlayerController::RequestClientToSendPlayerData_Implementation() {
     ServerReceivePlayerData(GI->PlayerData);
 }
 
-void AMyPlayerController::ServerReceivePlayerData_Implementation(const FPlayerData& playerData)
+void AMyPlayerController::ServerReceivePlayerData_Implementation(const FPlayerData& ReceivedPlayerData)
 {
-   AMyGameMode* gm = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+   AMyGameMode* GM = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 
-   this->PlayerData = playerData;
-   gm->ReceivePlayerData(playerData);
+   this->PlayerData = ReceivedPlayerData;
+   GM->ReceivePlayerData(ReceivedPlayerData);
 }
 
 
@@ -47,4 +49,21 @@ void AMyPlayerController::OnPossess(APawn* InPawn) {
 
     Super::OnPossess(InPawn);
 
+}
+
+void AMyPlayerController::SendChat_Implementation(const FText& Text) {
+    AMyGameMode* GM = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    FString ChatText = PlayerData.Name + FString(": ") + Text.ToString();
+    for (AMyPlayerController* player : GM->Players) {
+        player->ReceiveChat(FText::FromString(*ChatText));
+    }
+}
+
+void AMyPlayerController::ReceiveChat_Implementation(const FText& Text) {
+    if (!MainWidget) return;
+
+    UGameWidget* Widget = Cast<UGameWidget>(MainWidget);
+    if (Widget) {
+        Widget->ReceiveChat(Text);
+    }
 }
