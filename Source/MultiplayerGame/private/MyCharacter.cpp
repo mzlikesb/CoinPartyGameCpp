@@ -4,42 +4,55 @@
 #include "MyCharacter.h"
 #include "MyGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	Hat = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Hat"));
 	Hat->SetupAttachment(GetMesh(), TEXT("head"));
 
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	SpringArm->SetupAttachment(RootComponent);
+	SpringArm->bUsePawnControlRotation = true;
+
+	Camera = CreateDefaultSubobject<UCameraComponent>((TEXT("Camera")));
+	Camera->SetupAttachment(SpringArm);
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	bUseControllerRotationYaw = false;
 }
 
-// Called when the game starts or when spawned
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	UMyGameInstance* gi = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-	AController* pc = GetController();
-	if (gi && pc && pc->IsLocalPlayerController()) {
-		SetPlayerHat(gi->GetPlayerHatType());
-		SetPlayerColor(gi->GetPlayerColor());
+	UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	APlayerController* PC = GetController<APlayerController>();
+	if (!GI || !PC) return;
+	if(PC->IsLocalPlayerController()) {
+		SetPlayerHat(GI->GetPlayerHatType());
+		SetPlayerColor(GI->GetPlayerColor());
 	}
+
+	if (InputMappingContext) {
+		UEnhancedInputLocalPlayerSubsystem* inputSubsystem = PC->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+		if (inputSubsystem) {
+			inputSubsystem->AddMappingContext(InputMappingContext, 0);
+		}
+	}
+	
 }
 
-// Called every frame
 void AMyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
-void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
 
@@ -86,5 +99,46 @@ void AMyCharacter::SetPlayerColor_Implementation(FLinearColor color) {
 		if (dynamicMaterial) {
 			dynamicMaterial->SetVectorParameterValue(FName("Tint"), color);
 		}
+	}
+}
+
+void AMyCharacter::Move(const FInputActionValue& Value) {
+
+	if (!Controller) return;
+
+	FVector2D MovementVector = Value.Get<FVector2D>();
+	FRotator Rot = Controller->GetControlRotation();
+	FRotator YawRotation(0.0f, Rot.Yaw, 0.0f);
+
+	FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	AddMovementInput(RightDirection, MovementVector.X);
+	AddMovementInput(ForwardDirection, MovementVector.Y);
+
+}
+
+void AMyCharacter::Look(const FInputActionValue& Value) {
+	AddControllerYawInput(Value.Get<FVector2D>().X);
+	AddControllerPitchInput(Value.Get<FVector2D>().Y);
+}
+
+void AMyCharacter::JumpStarted(const FInputActionValue& Value) {
+	Jump();
+}
+
+void AMyCharacter::JumpCompleted(const FInputActionValue& Value) {
+	StopJumping();
+}
+
+void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	if (EnhancedInputComponent) {
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyCharacter::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyCharacter::Look);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AMyCharacter::JumpStarted);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AMyCharacter::JumpCompleted);
+		UE_LOG(LogTemp, Error, TEXT("bind keys"));
 	}
 }
