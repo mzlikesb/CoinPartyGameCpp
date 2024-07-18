@@ -9,6 +9,7 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "MyPlayerState.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -140,5 +141,12 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AMyCharacter::JumpStarted);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AMyCharacter::JumpCompleted);
 		UE_LOG(LogTemp, Error, TEXT("bind keys"));
+	}
+}
+
+void AMyCharacter::AddCoins(uint8 Value) {
+	AMyPlayerState* PS = Cast<AMyPlayerState>(GetPlayerState());
+	if (PS) {
+		PS->AddCoins(Value);
 	}
 }

@@ -69,4 +69,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void SetPlayerColor(FLinearColor color);
 
+	UFUNCTION()
+	void AddCoins(uint8 Value);
+
 };

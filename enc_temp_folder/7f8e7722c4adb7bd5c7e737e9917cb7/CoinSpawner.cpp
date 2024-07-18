@@ -19,7 +19,6 @@ void ACoinSpawner::BeginPlay()
 	Super::BeginPlay();
 	
 	if (HasAuthority()) {
-		UE_LOG(LogTemp, Error, TEXT("Spawn Coins"));
 		for (uint8 i = 0; i < NumberOfCoins; i++)
 		{
 			FVector SpawnLocation = UKismetMathLibrary::RandomPointInBoundingBox(

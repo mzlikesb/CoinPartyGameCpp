@@ -96,7 +96,7 @@ void ACoin::OnBeginOverlapComponentEvent(
 	if (!HasAuthority()) return;
 
 	if (AMyCharacter* pawn = Cast<AMyCharacter>(OtherActor)) {
-		//pawn->AddCoin(CoinValue);
+		pawn->AddCoins(CoinValue);
 		DestroyCoin();
 	}
 }

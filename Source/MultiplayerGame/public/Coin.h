@@ -32,7 +32,7 @@ protected:
 	URotatingMovementComponent* RotatingComponent;
 
 	UPROPERTY(ReplicatedUsing = OnRep_CoinValue)
-	uint32 CoinValue;
+	uint8 CoinValue;
 
 	UFUNCTION()
 	void OnRep_CoinValue();
