@@ -46,10 +46,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialInstance* GoldMaterial;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, Category = "Effects")
 	USoundBase* DestroySound;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, Category = "Effects")
 	UParticleSystem* DestroyEffect;
 
 	UFUNCTION(Server, Reliable)

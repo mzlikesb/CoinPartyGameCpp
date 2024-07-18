@@ -7,6 +7,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "MyCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ACoin::ACoin()
@@ -72,9 +73,20 @@ void ACoin::OnRep_CoinValue()
 
 void ACoin::DestroyCoin_Implementation() {
 	Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//spawn sound at location
-	//spwan emitter at location
-	// hidden actor 
+
+	if (DestroySound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, DestroySound, GetActorLocation());
+	}
+
+	if (DestroyEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DestroyEffect, GetActorLocation(), GetActorRotation());
+	}
+
+	Mesh->SetVisibility(false);
+
+	SetLifeSpan(2.0f);
 }
 
 void ACoin::OnBeginOverlapComponentEvent(
