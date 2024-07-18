@@ -8,9 +8,7 @@
 #include "PlayerData.h"
 #include "MyPlayerController.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class MULTIPLAYERGAME_API AMyPlayerController : public APlayerController
 {
@@ -35,6 +33,11 @@ public:
 
 	UPROPERTY()
 	FPlayerData PlayerData;
+
+	UFUNCTION(Client, Reliable)
+	void UpdateAllPlayerData(const TArray<FPlayerData>& AllPlayerData);
+
+
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)

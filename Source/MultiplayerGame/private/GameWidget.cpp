@@ -18,6 +18,10 @@ void UGameWidget::NativeConstruct() {
     ExitButton->OnClicked.AddDynamic(this, &UGameWidget::ExitGame);
 
     ChatText->OnTextCommitted.AddDynamic(this, &UGameWidget::SendChat);
+    AMyPlayerController* PC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+    if (PC) {
+        UpdatePlayerName(FText::FromString(PC->PlayerData.Name));
+    }
 }
 
 FText UGameWidget::GetConnectionMode() {
@@ -58,3 +62,18 @@ void UGameWidget::ReceiveChat(const FText& Text) {
     Chat->SetText(Text);
     ChatList->AddChild(Chat);
 }
+
+void UGameWidget::UpdatePlayerName(const FText& Name) {
+    PlayerName->SetText(Name);
+}
+
+void UGameWidget::UpdateAllPlayerData(TArray<FPlayerData> PlayersData) {
+    PlayerList->ClearChildren();
+    for (FPlayerData data : PlayersData)
+    {
+        UTextBlock* Text = NewObject<UTextBlock>(this);
+        Text->SetText(FText::FromString(data.Name));
+        PlayerList->AddChild(Text);
+    }
+}
+

@@ -41,7 +41,7 @@ void AMyPlayerController::ServerReceivePlayerData_Implementation(const FPlayerDa
    AMyGameMode* GM = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 
    this->PlayerData = ReceivedPlayerData;
-   GM->ReceivePlayerData(ReceivedPlayerData);
+   GM->UpdateAllPlayerData();
 }
 
 
@@ -65,5 +65,12 @@ void AMyPlayerController::ReceiveChat_Implementation(const FText& Text) {
     UGameWidget* Widget = Cast<UGameWidget>(MainWidget);
     if (Widget) {
         Widget->ReceiveChat(Text);
+    }
+}
+
+void AMyPlayerController::UpdateAllPlayerData_Implementation(const TArray<FPlayerData>& AllPlayerData) {
+    UGameWidget* Widget = Cast<UGameWidget>(MainWidget);
+    if (Widget) {
+        Widget->UpdateAllPlayerData(AllPlayerData);
     }
 }

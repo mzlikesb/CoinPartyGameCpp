@@ -20,12 +20,13 @@ public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 	UFUNCTION()
-	void ReceivePlayerData(const FPlayerData& playerData);
+	void UpdateAllPlayerData();
 
 	UPROPERTY(VisibleAnywhere)
-	TArray<FPlayerData> PlayerDatas;
+	TArray<FPlayerData> AllPlayerData;
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<AMyPlayerController*> Players;
 
+	void Logout(AController* Exiting) override;
 };

@@ -31,6 +31,12 @@ public:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
 	class UVerticalBox* ChatList;
 
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	class UTextBlock* PlayerName;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	class UVerticalBox* PlayerList;
+
 	FText GetConnectionMode();
 
 	FText GetRoomName();
@@ -44,6 +50,12 @@ public:
 
 	UFUNCTION()
 	void ExitGame();
+
+	UFUNCTION()
+	void UpdatePlayerName(const FText& Name);
+
+	UFUNCTION()
+	void UpdateAllPlayerData(TArray<FPlayerData> PlayersData);
 
 protected:
 	virtual void NativeConstruct() override;
