@@ -15,8 +15,6 @@ void AMenuGameMode::BeginPlay() {
 	if (GI && character) {
 		character->SetPlayerHat(GI->GetPlayerHatType());
 		character->SetPlayerColor(GI->GetPlayerColor());
-
-		UE_LOG(LogTemp, Warning, TEXT("Set Player"));
 	}
 
 }
