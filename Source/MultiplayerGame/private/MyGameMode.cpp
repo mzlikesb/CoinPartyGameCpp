@@ -44,7 +44,6 @@ void AMyGameMode::Logout(AController* Exiting) {
 
 	AMyPlayerController* player = Cast<AMyPlayerController>(Exiting);
 	if (player) {
-		
 		int32 index = Players.Find(player);
 		Players.RemoveAt(index);
 		AllPlayerData.RemoveAt(index);

@@ -77,3 +77,7 @@ void UGameWidget::UpdateAllPlayerData(TArray<FPlayerData> PlayersData) {
     }
 }
 
+void UGameWidget::UpdateCoins(uint8 Value) {
+    NumberOfCoins->SetText(FText::AsNumber(Value));
+}
+

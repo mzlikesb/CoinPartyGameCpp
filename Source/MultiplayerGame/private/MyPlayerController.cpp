@@ -74,3 +74,10 @@ void AMyPlayerController::UpdateAllPlayerData_Implementation(const TArray<FPlaye
         Widget->UpdateAllPlayerData(AllPlayerData);
     }
 }
+
+void AMyPlayerController::UpdateCoin_Implementation(uint8 Value) {
+    UGameWidget* Widget = Cast<UGameWidget>(MainWidget);
+    if (Widget) {
+        Widget->UpdateCoins(Value);
+    }
+}

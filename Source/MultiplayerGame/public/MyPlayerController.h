@@ -37,7 +37,8 @@ public:
 	UFUNCTION(Client, Reliable)
 	void UpdateAllPlayerData(const TArray<FPlayerData>& AllPlayerData);
 
-
+	UFUNCTION(Client, Reliable)
+	void UpdateCoin(uint8 Value);
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)

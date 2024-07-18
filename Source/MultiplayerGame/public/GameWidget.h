@@ -37,6 +37,9 @@ public:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
 	class UVerticalBox* PlayerList;
 
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	class UTextBlock* NumberOfCoins;
+
 	FText GetConnectionMode();
 
 	FText GetRoomName();
@@ -56,6 +59,9 @@ public:
 
 	UFUNCTION()
 	void UpdateAllPlayerData(TArray<FPlayerData> PlayersData);
+
+	UFUNCTION()
+	void UpdateCoins(uint8 Value);
 
 protected:
 	virtual void NativeConstruct() override;
