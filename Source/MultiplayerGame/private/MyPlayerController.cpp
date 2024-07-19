@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MyPlayerController.h"
 #include "GameFramework/PlayerController.h"
@@ -13,6 +13,7 @@ void AMyPlayerController::BeginPlay(){
 
     Super::BeginPlay();
     SetWidget();
+
 }
 
 void AMyPlayerController::SetWidget(){
@@ -38,17 +39,15 @@ void AMyPlayerController::RequestClientToSendPlayerData_Implementation() {
 
 void AMyPlayerController::ServerReceivePlayerData_Implementation(const FPlayerData& ReceivedPlayerData)
 {
-   AMyGameMode* GM = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-
-   this->PlayerData = ReceivedPlayerData;
-   GM->UpdateAllPlayerData();
+    AMyGameMode* GM = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    PlayerData = ReceivedPlayerData;
+    GM->UpdateAllPlayerData();
 }
 
 
 void AMyPlayerController::OnPossess(APawn* InPawn) {
 
     Super::OnPossess(InPawn);
-
 }
 
 void AMyPlayerController::SendChat_Implementation(const FText& Text) {

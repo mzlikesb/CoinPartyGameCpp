@@ -46,6 +46,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UInputAction* JumpAction;
 
+	UPROPERTY(VisibleAnywhere)
+	uint8 PlayerID;
+
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
 
@@ -57,6 +60,8 @@ protected:
 
 	UFUNCTION()
 	void JumpCompleted(const FInputActionValue& Value);
+
+	void Destroyed() override;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -71,5 +76,8 @@ public:
 
 	UFUNCTION()
 	void AddCoins(uint8 Value);
+
+	UFUNCTION()
+	void SetPlayerID(uint8 id);
 
 };

@@ -8,6 +8,7 @@
 #include "Components/Button.h"
 #include "Components/EditableText.h"
 #include "MyPlayerController.h"
+#include "MyGameMode.h"
 #include "Components/VerticalBox.h"
 
 void UGameWidget::NativeConstruct() {
@@ -22,6 +23,14 @@ void UGameWidget::NativeConstruct() {
     if (PC) {
         UpdatePlayerName(FText::FromString(PC->PlayerData.Name));
     }
+    APlayerController* OwningPlayer = GetOwningPlayer<APlayerController>();
+    
+    // for server update timming issue
+    if (OwningPlayer->HasAuthority()) {
+        AMyGameMode* GM = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+        UpdateAllPlayerData(GM->AllPlayerData);
+    }
+    
 }
 
 FText UGameWidget::GetConnectionMode() {

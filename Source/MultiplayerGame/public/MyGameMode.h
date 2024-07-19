@@ -23,10 +23,16 @@ public:
 	void UpdateAllPlayerData();
 
 	UPROPERTY(VisibleAnywhere)
-	TArray<FPlayerData> AllPlayerData;
+	TArray<FPlayerData> AllPlayerData = TArray<FPlayerData>();
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<AMyPlayerController*> Players;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class AMyCharacter> PawnClass;
+
 	void Logout(AController* Exiting) override;
+
+	UFUNCTION()
+	void RespawnPlayer(uint8 playerID);
 };

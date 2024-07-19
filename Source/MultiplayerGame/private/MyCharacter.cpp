@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "MyPlayerState.h"
+#include "MyGameMode.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -148,4 +149,25 @@ void AMyCharacter::AddCoins(uint8 Value) {
 	if (PS) {
 		PS->AddCoins(Value);
 	}
+}
+
+void AMyCharacter::SetPlayerID(uint8 id) {
+	PlayerID = id;
+}
+
+void AMyCharacter::Destroyed() {
+	Super::Destroyed();
+
+	UE_LOG(LogTemp, Error, TEXT("Destroyed1"));
+	if (!HasAuthority()) return;
+	
+	//AController* controller = GetController();
+	//if (!controller) return;
+
+	UE_LOG(LogTemp, Error, TEXT("Destroyed2"));
+	AMyGameMode* gm = GetWorld()->GetAuthGameMode<AMyGameMode>();
+	if (!gm) return;
+
+	UE_LOG(LogTemp, Error, TEXT("Destroyed3"));
+	gm->RespawnPlayer(PlayerID);
 }
