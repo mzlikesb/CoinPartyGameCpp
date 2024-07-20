@@ -160,8 +160,8 @@ void AMyCharacter::Destroyed() {
 
 	if (!HasAuthority()) return;
 	
-	//AController* controller = GetController();
-	//if (!controller) return;
+	AController* controller = GetController();
+	if (!controller) return;
 
 	AMyGameMode* gm = GetWorld()->GetAuthGameMode<AMyGameMode>();
 	if (!gm) return;
