@@ -72,10 +72,7 @@ void UMainWidget::FindSessions() {
 
 void UMainWidget::OnFoundSession(FString SessionName, int32 MaxPlayers, int32 CurrentPlayers, int32 SessionIndex) {
     UE_LOG(LogTemp, Error, TEXT(" %s"), *SessionName);
-    if (GEngine)
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT(" %s"), *SessionName));
-    }
+
     if (!ButtonWidget) return;
 
     UButtonWidget* Button = CreateWidget<UButtonWidget>(GetWorld(), ButtonWidget);

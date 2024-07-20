@@ -6,9 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameWidget.generated.h"
 
-/**
- * 
- */
+class AMyGameState;
 UCLASS()
 class MULTIPLAYERGAME_API UGameWidget : public UUserWidget
 {
@@ -40,6 +38,9 @@ public:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
 	class UTextBlock* NumberOfCoins;
 
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	class UProgressBar* TimeProgress;
+
 	FText GetConnectionMode();
 
 	FText GetRoomName();
@@ -49,10 +50,6 @@ public:
 
 	UFUNCTION()
 	void ReceiveChat(const FText& Text);
-
-
-	UFUNCTION()
-	void ExitGame();
 
 	UFUNCTION()
 	void UpdatePlayerName(const FText& Name);
@@ -65,5 +62,12 @@ public:
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+	UFUNCTION()
+	void ExitGame();
+
+	UPROPERTY()
+	AMyGameState* GameState;
 
 };

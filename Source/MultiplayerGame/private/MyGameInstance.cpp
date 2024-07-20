@@ -54,6 +54,8 @@ void UMyGameInstance::CreateGame(FString roomName) {
 }
 
 void UMyGameInstance::EndGame() {
+    if (!sessionInterface.IsValid()) return;
+
     sessionInterface->DestroySession(currentSessionName);
 }
 

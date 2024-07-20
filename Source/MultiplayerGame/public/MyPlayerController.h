@@ -6,9 +6,10 @@
 #include "GameFramework/PlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "PlayerData.h"
+#include "PlayerScore.h"
 #include "MyPlayerController.generated.h"
 
-
+class UGameOverWidget;
 UCLASS()
 class MULTIPLAYERGAME_API AMyPlayerController : public APlayerController
 {
@@ -40,13 +41,21 @@ public:
 	UFUNCTION(Client, Reliable)
 	void UpdateCoin(uint8 Value);
 
+	UFUNCTION(Client, Reliable)
+	void ShowGameOverWidget(const TArray<FPlayerScore>& AllPlayerScore);
+
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TSubclassOf<UUserWidget> WidgetClass;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TSubclassOf<UGameOverWidget> GameOverWidgetClass;
 
 	UPROPERTY()
 	UUserWidget* MainWidget;
 
 	void SetWidget();
+
+
 
 };

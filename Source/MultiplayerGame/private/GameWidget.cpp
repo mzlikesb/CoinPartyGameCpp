@@ -10,6 +10,8 @@
 #include "MyPlayerController.h"
 #include "MyGameMode.h"
 #include "Components/VerticalBox.h"
+#include "Components/ProgressBar.h"
+#include "MyGameState.h"
 
 void UGameWidget::NativeConstruct() {
     Super::NativeConstruct();
@@ -31,6 +33,17 @@ void UGameWidget::NativeConstruct() {
         UpdateAllPlayerData(GM->AllPlayerData);
     }
     
+    GameState = GetWorld()->GetGameState<AMyGameState>();
+}
+
+void UGameWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+    Super::NativeTick(MyGeometry, InDeltaTime);
+
+    if (GameState && TimeProgress)
+    {
+        TimeProgress->SetPercent(GameState->GetProgress());
+    }
 }
 
 FText UGameWidget::GetConnectionMode() {
@@ -89,4 +102,3 @@ void UGameWidget::UpdateAllPlayerData(TArray<FPlayerData> PlayersData) {
 void UGameWidget::UpdateCoins(uint8 Value) {
     NumberOfCoins->SetText(FText::AsNumber(Value));
 }
-

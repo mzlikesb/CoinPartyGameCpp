@@ -35,15 +35,13 @@ void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	UMyGameInstance* GI = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-	APlayerController* PC = GetController<APlayerController>();
-	if (!GI || !PC) return;
-	if(PC->IsLocalPlayerController()) {
-		SetPlayerHat(GI->GetPlayerHatType());
-		SetPlayerColor(GI->GetPlayerColor());
+	if(HasAuthority()) {
+		AMyGameMode* GM = GetWorld()->GetAuthGameMode<AMyGameMode>();
+		GM->InitPawn(this, 0);
 	}
 
-	if (InputMappingContext) {
+	APlayerController* PC = GetController<APlayerController>();
+	if (PC && InputMappingContext) {
 		UEnhancedInputLocalPlayerSubsystem* inputSubsystem = PC->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 		if (inputSubsystem) {
 			inputSubsystem->AddMappingContext(InputMappingContext, 0);
@@ -59,6 +57,7 @@ void AMyCharacter::Tick(float DeltaTime)
 }
 
 void AMyCharacter::SetPlayerHat_Implementation(EHatType type) {
+	if (this == nullptr) return;
 	if (!Hat) return;
 
 	FString path = "";
@@ -91,6 +90,7 @@ void AMyCharacter::SetPlayerHat_Implementation(EHatType type) {
 }		
 
 void AMyCharacter::SetPlayerColor_Implementation(FLinearColor color) {
+	if (this == nullptr) return;
 	USkeletalMeshComponent* skeletalMeshComp = GetMesh();
 	if (!skeletalMeshComp)return;
 
@@ -158,16 +158,13 @@ void AMyCharacter::SetPlayerID(uint8 id) {
 void AMyCharacter::Destroyed() {
 	Super::Destroyed();
 
-	UE_LOG(LogTemp, Error, TEXT("Destroyed1"));
 	if (!HasAuthority()) return;
 	
 	//AController* controller = GetController();
 	//if (!controller) return;
 
-	UE_LOG(LogTemp, Error, TEXT("Destroyed2"));
 	AMyGameMode* gm = GetWorld()->GetAuthGameMode<AMyGameMode>();
 	if (!gm) return;
 
-	UE_LOG(LogTemp, Error, TEXT("Destroyed3"));
 	gm->RespawnPlayer(PlayerID);
 }

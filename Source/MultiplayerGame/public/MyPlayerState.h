@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "PlayerScore.h"
 #include "MyPlayerState.generated.h"
 
 /**
@@ -17,11 +18,15 @@ class MULTIPLAYERGAME_API AMyPlayerState : public APlayerState
 protected:
 
 	UPROPERTY()
-	uint8 Coins;
+	FPlayerScore PlayerScore = FPlayerScore();
 
 public:
 	UFUNCTION()
 	void AddCoins(uint8 Value);
 
+	UFUNCTION()
+	void InitScore(uint8 ID, FString Name);
+
+	FORCEINLINE FPlayerScore GetPlayerScore() { return PlayerScore; }
 
 };

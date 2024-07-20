@@ -6,6 +6,8 @@
 #include "MyCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
+#include "MyPlayerState.h"
+#include "MyGameState.h"
 
 AMyGameMode::AMyGameMode()
 {
@@ -22,6 +24,16 @@ void AMyGameMode::PostLogin(APlayerController* NewPlayer) {
 	}
 }
 
+
+void AMyGameMode::BeginPlay() {
+	Super::BeginPlay();
+
+	AMyGameState* GS = GetGameState<AMyGameState>();
+	if (GS) {
+		GS->StartGame();
+	}
+}
+
 void AMyGameMode::UpdateAllPlayerData() {
 
 	if (this == nullptr) return;
@@ -30,14 +42,15 @@ void AMyGameMode::UpdateAllPlayerData() {
 	for (int i = 0; i < Players.Num(); i++) {
 		AllPlayerData.Add(Players[i]->PlayerData);
 		FString playerName = Players[i]->PlayerData.Name;
+
 		int playernum = AllPlayerData.Num();
 		APawn* pawn = Players[i]->GetPawn();
-		if (pawn) {
-			AMyCharacter* character = Cast<AMyCharacter>(pawn);
-			character->SetPlayerHat(AllPlayerData[i].HatType);
-			character->SetPlayerColor(AllPlayerData[i].Color);
-			character->SetPlayerID(i);
-		}
+		if (!pawn) continue;
+
+		// server pawn은 아직 생성되지 않음
+		AMyCharacter* character = Cast<AMyCharacter>(pawn);
+		if (!character) continue;
+		InitPawn(character, i);
 	}
 	for (AMyPlayerController* player : Players) {
 		player->UpdateAllPlayerData(AllPlayerData);
@@ -59,12 +72,8 @@ void AMyGameMode::Logout(AController* Exiting) {
 
 void AMyGameMode::RespawnPlayer(uint8 playerID) {
 
-
-	UE_LOG(LogTemp, Error, TEXT("Respawn1 %d %d"), Players.Num(), AllPlayerData.Num());
-
 	if (playerID >= Players.Num() || playerID >= AllPlayerData.Num()) return;
 
-	UE_LOG(LogTemp, Error, TEXT("Respawn2"));
 
 	AActor* playerStart = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass());
 	FActorSpawnParameters SpawnParams;
@@ -73,6 +82,27 @@ void AMyGameMode::RespawnPlayer(uint8 playerID) {
 	AMyCharacter* pawn = GetWorld()->SpawnActor<AMyCharacter>(PawnClass, playerStart->GetActorTransform(), SpawnParams);
 	Players[playerID]->Possess(pawn);
 	FPlayerData data = AllPlayerData[playerID];
-	pawn->SetPlayerHat(data.HatType);
-	pawn->SetPlayerColor(data.Color);
+	InitPawn(pawn, playerID);
+}
+
+void AMyGameMode::InitPawn(AMyCharacter* pawn, uint8 id){
+	if (this == nullptr) return;
+	pawn->SetPlayerHat(AllPlayerData[id].HatType);
+	pawn->SetPlayerColor(AllPlayerData[id].Color);
+	pawn->SetPlayerID(id);
+
+	AMyPlayerState* ps = Cast<AMyPlayerState>(pawn->GetPlayerState());
+	if (ps) {
+		ps->InitScore(id, AllPlayerData[id].Name);
+	}
+}
+
+void AMyGameMode::GameOver(TArray<FPlayerScore>& AllPlayerScore) {
+
+	AMyGameState* GS = GetGameState<AMyGameState>();
+	if (GS) {
+		for (AMyPlayerController* Player : Players) {
+			Player->ShowGameOverWidget(AllPlayerScore);
+		}
+	}
 }

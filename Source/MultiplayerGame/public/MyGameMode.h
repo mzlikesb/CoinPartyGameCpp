@@ -18,6 +18,7 @@ class MULTIPLAYERGAME_API AMyGameMode : public AGameMode
 public:
 	AMyGameMode();
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	void UpdateAllPlayerData();
@@ -35,4 +36,10 @@ public:
 
 	UFUNCTION()
 	void RespawnPlayer(uint8 playerID);
+
+	UFUNCTION()
+	void InitPawn(AMyCharacter* pawn, uint8 id);
+
+	UFUNCTION()
+	void GameOver(TArray<FPlayerScore>& AllPlayerScore);
 };

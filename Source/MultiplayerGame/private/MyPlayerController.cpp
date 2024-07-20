@@ -7,6 +7,7 @@
 #include "MyGameMode.h"
 #include "MyCharacter.h"
 #include "GameWidget.h"
+#include "GameOverWidget.h"
 
 
 void AMyPlayerController::BeginPlay(){
@@ -79,4 +80,11 @@ void AMyPlayerController::UpdateCoin_Implementation(uint8 Value) {
     if (Widget) {
         Widget->UpdateCoins(Value);
     }
+}
+
+void AMyPlayerController::ShowGameOverWidget_Implementation(const TArray<FPlayerScore>& AllPlayerScore) {
+    MainWidget->RemoveFromParent();
+    UGameOverWidget* Widget = CreateWidget<UGameOverWidget>(this, GameOverWidgetClass);
+    Widget->ShowScore(AllPlayerScore);
+    Widget->AddToViewport();
 }
